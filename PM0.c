@@ -450,6 +450,7 @@ int main(void)
     fclose(file);
     free(R);
     free(code);
+    free(brackets);
 
     return 0;
 }
