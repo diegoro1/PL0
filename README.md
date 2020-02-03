@@ -30,11 +30,11 @@ Do the following
 
 ```
 Delete the input.txt file given and replace with your own
-Make sure the file name is �input.txt�
+Make sure the file name is "input.txt"
 ```
 Or
 ```
-Change line 426 to strcpy(input_file_name, �*your file name*�);
+Change line 426 to strcpy(input_file_name, "*your file name*");
 Make sure it is a .txt file
 ```
 
