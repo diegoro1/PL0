@@ -183,6 +183,26 @@ int fetch(int *pc, instruction *code, instruction *ir)
    return prev_PC;
 }
 
+// prints data (used for after execution)
+// TODO: inplement print(pc,bp,sp,register) in same line then add stack(not all), figure out "|"
+void print(int *stack, FILE *ifp, int *R, int *SP, int *PC, int *BP, instruction *ir, char *op, int prev_PC)
+{
+    int i;
+    fprintf(ifp, "\t\t\t\t\t%s\t%s\t%s\t%s\n","pc","bp","sp","registers");
+    fprintf(ifp,"%d %s %d %d %d\t\t\t", prev_PC, op, ir->r, ir->l, ir->m);
+    fprintf(ifp, "%d\t%d\t%d\t", *PC, *BP, *SP);
+    for (i = 0; i < REGISTERS_AMOUNT; i++)
+        fprintf(ifp, "%d%c",R[i], (i == (REGISTERS_AMOUNT - 1)? '\n' : ' '));
+    
+    // prints stack
+    fprintf(ifp, "Stack: ");
+    for (i = 1; i <= *SP; i++)
+        fprintf(ifp, "%d%c", stack[i], (i == *SP)? '\n' : ' ');       
+    
+    // adding \n for file readability
+    fprintf(ifp, "\n");
+}
+
 // i == r, j == l, k == m
 void execute(instruction *ir, int *R, int *SP, int *PC, int *BP, int *stack, int *halt, int prev_PC, FILE *ifp)
 {
@@ -191,23 +211,27 @@ void execute(instruction *ir, int *R, int *SP, int *PC, int *BP, int *stack, int
         // LIT
         case 1:
             R[ir->r] = ir->m;
+            print(stack, ifp, R, SP, PC, BP, ir, "LIT", prev_PC);
             break;
         
         // RTN
         case 2:
             *SP = *BP - 1;
             *BP = stack[*SP + 3];
-            *PC = stack[*PC + 4];
+            *PC = stack[*SP + 4];
+            print(stack, ifp, R, SP, PC, BP, ir, "RTN", prev_PC);
             break;
         
         // LOD 
         case 3:
             R[ir->r] = stack[base(ir->l, *BP, stack) + ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "LOD", prev_PC);
             break;
         
         // STO
         case 4:
             stack[base(ir->l, *BP, stack) + ir->m] = R[ir->r];
+            print(stack, ifp, R, SP, PC, BP, ir, "STO", prev_PC);
             break;
         
         // CAL
@@ -218,103 +242,123 @@ void execute(instruction *ir, int *R, int *SP, int *PC, int *BP, int *stack, int
             stack[*SP + 4] = *PC;
             *BP = *SP + 1;
             *PC = ir->m;
+            print(stack, ifp, R, SP, PC, BP, ir, "CAL", prev_PC);
             break;
         
         // INC
         case 6:
             *SP = *SP + ir->m;
+            print(stack, ifp, R, SP, PC, BP, ir, "INC", prev_PC);
             break;
         
         // JMP
         case 7:
             *PC = ir->m;
+            print(stack, ifp, R, SP, PC, BP, ir, "JMP", prev_PC);
             break;
 
         // JPC
         case 8:
             if (R[ir->r] == 0)
                 *PC = ir->m;
+            print(stack, ifp, R, SP, PC, BP, ir, "JPC", prev_PC);
             break;
         
         // SIO
         case 9:
             printf("%d\n", R[ir->r]);
+            print(stack, ifp, R, SP, PC, BP, ir, "SIO", prev_PC);
             break;
         
         // SIO
         case 10:
             printf("Insert integer: ");
             scanf("%d\n", &R[ir->r]);
+            print(stack, ifp, R, SP, PC, BP, ir, "SIO", prev_PC);
             break;
         
         // SIO
         case 11:
             *halt = 1;
+            print(stack, ifp, R, SP, PC, BP, ir, "SIO", prev_PC);
             break;
 
         // NEG
         case 12:
             R[ir->r] = -R[ir->r];
+            print(stack, ifp, R, SP, PC, BP, ir, "NEG", prev_PC);
             break;
         
         // ADD
         case 13:
             R[ir->r] = R[ir->l] + R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "ADD", prev_PC);
             break;
         
         // SUB
         case 14:
             R[ir->r] = R[ir->l] - R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "SUB", prev_PC);
             break;
         
         // MUL
         case 15:
             R[ir->r] = R[ir->l] * R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "MUL", prev_PC);
             break;
         
         // DIV
         case 16:
             R[ir->r] = R[ir->l] / R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "DIV", prev_PC);
             break;
 
         // ODD
         case 17:
             R[ir->r] = R[ir->r] % 2;
+            print(stack, ifp, R, SP, PC, BP, ir, "ODD", prev_PC);
             break;
         
         // MOD
         case 18:
             R[ir->r] = R[ir->l] % R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "MOD", prev_PC);
             break;
 
         // EQL
         case 19:
             R[ir->r] = R[ir->l] == R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "EQL", prev_PC);
             break;
 
         // NEQ
         case 20:
             R[ir->r] = R[ir->l] != R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "NEQ", prev_PC);
             break;
 
         // LSS
         case 21:
             R[ir->r] = R[ir->l] < R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "LSS", prev_PC);
             break;
         
         // LEQ
         case 22:
             R[ir->r] = R[ir->l] <= R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "LEQ", prev_PC);
             break;
         
         // GTR
         case 23:
             R[ir->r] = R[ir->l] > R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "GRT", prev_PC);
             break;
         
         // GEQ
         case 24:
             R[ir->r] = R[ir->l] >= R[ir->m];
+            print(stack, ifp, R, SP, PC, BP, ir, "GEQ", prev_PC);
             break;
     }
 }
@@ -341,20 +385,15 @@ void print_init(int *stack, FILE *ifp, int *R, int *SP, int *PC, int *BP)
     fprintf(ifp, "\nStack: ");
 
     print_stack(stack, ifp);
+    // adding \n for file readability
+    fprintf(ifp, "\n");
 }
 
-// prints data (used for after execution)
-// TODO: inplement print(pc,bp,sp,register) in same line then add stack(not all), figure out "|"
-void print(int *stack, FILE *ifp, int *R, int *SP, int *PC, int *BP, instruction *ir, char *op, int prev_PC)
-{
-    int i;
-    fprintf(ifp, "\t\t\t\t\t%s\t%s\t%s\t%s\n","pc","bp","sp","registers");
-    fprintf(ifp,"%d\t\t%s\t%d\t%d\t%d\n", prev_PC, op, ir->r, ir->l, ir->m);
-}
 
 
 int main(void)
 {
+    int i = 0;
     FILE *file;
     int lines;
     int prev_PC; 
@@ -391,11 +430,14 @@ int main(void)
     }
 
     print_init(stack, file, R, &SP, &PC, &BP);
-    while(halt == 0)
+    while((halt != 1) && (i < 16))
     {
         prev_PC = fetch(&PC, code, &IR);
         execute(&IR, R, &SP, &PC, &BP, stack, &halt, prev_PC, file);
+        i++;
     }
+
+    printf("\n%d\n", halt);
 
 
     // closing files and freeing mem
