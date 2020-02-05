@@ -184,11 +184,11 @@ int fetch(int *pc, instruction *code, instruction *ir)
 }
 
 // prints data (used for after execution)
-// TODO: inplement print(pc,bp,sp,register) in same line then add stack(not all), figure out "|"
+// Array of "|" here, delete for better peformance
 void print(int *stack, FILE *ifp, int *R, int *SP, int *PC, int *BP, instruction *ir, char *op, int prev_PC, int *brakets)
 {
     int i;
-    fprintf(ifp, "\t\t\t\t\t\t%s\t%s\t%s\t%s\n","pc","bp","sp","registers");
+    fprintf(ifp, "\t\t\t\t%s\t%s\t%s\t%s\n","pc","bp","sp","registers");
     fprintf(ifp,"%d %s %d %d %d \t\t\t", prev_PC, op, ir->r, ir->l, ir->m);
     fprintf(ifp, "%d\t%d\t%d\t", *PC, *BP, *SP);
     for (i = 0; i < REGISTERS_AMOUNT; i++)
@@ -199,7 +199,7 @@ void print(int *stack, FILE *ifp, int *R, int *SP, int *PC, int *BP, instruction
     for (i = 1; i <= *SP; i++)
     {
         fprintf(ifp, "%d%c", stack[i], (i == *SP)? '\n' : ' ');
-        if (brakets[i] == 1)
+        if (brakets[i] == 1 && (i != *SP))
             fprintf(ifp, "| ");
     }       
     
@@ -220,7 +220,7 @@ void execute(instruction *ir, int *R, int *SP, int *PC, int *BP, int *stack, int
         
         // RTN
         case 2:
-            brakets[*BP] = 0;
+            brakets[*BP - 1] = 0;
             *SP = *BP - 1;
             *BP = stack[*SP + 3];
             *PC = stack[*SP + 4];
@@ -383,8 +383,8 @@ void print_stack(int *stack, FILE *ifp)
 void print_init(int *stack, FILE *ifp, int *R, int *SP, int *PC, int *BP)
 {
     int i;
-    fprintf(ifp, "\t\t\t\t\t%s\t%s\t%s\t%s\n","pc","bp","sp","registers");
-    fprintf(ifp, "Initial Values:\t\t%d\t%d\t%d\t", *PC, *BP, *SP);
+    fprintf(ifp, "\t\t\t\t%s\t%s\t%s\t%s\n","pc","bp","sp","registers");
+    fprintf(ifp, "Initial Values:\t\t\t%d\t%d\t%d\t", *PC, *BP, *SP);
     
     for(i = 0; i < REGISTERS_AMOUNT; i++)
         fprintf(ifp, "%d ", R[i]);
