@@ -435,8 +435,8 @@ int main(void)
     int index = 0;
 
     // change these values depending on file names
-    strcpy(input_file_name, "input.txt");
-    strcpy(output_file_name, "output.txt");
+    strcpy(input_file_name, "lex_input.txt");
+    strcpy(output_file_name, "lex_output.txt");
 
     // attempts to open input-file to read from and output-file to write to
     if ((ifp = fopen(input_file_name,"r")) == NULL)
